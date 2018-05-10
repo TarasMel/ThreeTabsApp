@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">ThreeTabsApp</string>
+    <string name="sql_tab_name">SQL</string>
+    <string name="image_tab_name">Image</string>
+    <string name="archive_tab_name">Archive</string>
+
+
+    <!--EditText hint -->
+    <string name="hint_editSqlTab_add">add item</string>
+    <string name="hint_editSqlTab_search_in_list">search in list</string>
+    <string name="hint_editImageTab_upload">upload image</string>
+    <string name="hint_editArchiveTab_upload">upload archive</string>
+
+    <string name="menu_title">Delete</string>
+
+    <!--String names for buttons-->
+    <string name="btn_add_to_list">Add</string>
+    <string name="btn_find_in_list">Find</string>
+    <string name="btn_upload">Upload</string>
+
+
+</resources>

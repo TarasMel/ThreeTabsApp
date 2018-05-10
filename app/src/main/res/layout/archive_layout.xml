@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/archiveTab_ID"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.taras.threetabsapp.ArchiveTab">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:id="@+id/linear_searchUploadArchive_ID"
+        android:orientation="horizontal"
+        android:layout_alignParentStart="true"
+        tools:ignore="UselessParent">
+
+        <EditText
+            android:layout_marginStart="10dp"
+            android:id="@+id/edit_UploadArchive_ID"
+            android:hint="@string/hint_editArchiveTab_upload"
+            android:layout_width="260dp"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="10dp"
+            android:text="@string/btn_upload"
+            android:id="@+id/btn_UploadArchive_ID"/>
+    </LinearLayout>
+
+</RelativeLayout>
