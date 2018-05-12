@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.github.chrisbanes.photoview.PhotoView;
 import com.squareup.picasso.Picasso;
 
 
@@ -22,8 +23,7 @@ public class ImageTab extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private EditText editURL;
-    private Button btn_Download;
-    private ImageView imageView;
+    private PhotoView photoView;
 
     //private static final String URL = "http://www.tate.org.uk/art/images/work/T/T05/T05010_10.jpg";
 
@@ -43,19 +43,19 @@ public class ImageTab extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        imageView = (ImageView) getActivity().findViewById(R.id.imageView_ImageTab_ID);
+        photoView = (PhotoView) getActivity().findViewById(R.id.photoView_ImageTab_ID);
         editURL = (EditText) getActivity().findViewById(R.id.edit_UploadImage_ID);
-        btn_Download = (Button) getActivity().findViewById(R.id.btn_UploadImage_ID);
+        Button btn_Download = (Button) getActivity().findViewById(R.id.btn_UploadImage_ID);
         btn_Download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     Picasso.with(getActivity())
+                            /*.load(URL)*/
                             .load(editURL.getText().toString())
                             .placeholder(R.drawable.download)
                             .error(R.drawable.error)
-                            .resize(2000, 2000)
-                            .into(imageView);
+                            .into(photoView);
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -64,7 +64,6 @@ public class ImageTab extends Fragment {
                 }
             }
         });
-
 
     }
 

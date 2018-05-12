@@ -1,12 +1,18 @@
 package com.example.taras.threetabsapp;
 
+
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,9 +31,12 @@ import java.net.URL;
 import java.text.DecimalFormat;
 
 
+
+
 public class ArchiveTab extends Fragment {
 
-    //private static final String PATH_TO_DOWNLOAD = "http://storage.rulsmart.com/1c46/getfiles/kartinki/1254497292_tachki.zip";
+    private static final int MY_PERMISSION = 1;
+    private static final String PATH_TO_DOWNLOAD = "http://storage.rulsmart.com/1c46/getfiles/kartinki/1254497292_tachki.zip";
     private ProgressDialog progressDialog;
     private Button btn_downloadArchive;
     private EditText editTextLinkUploadArchive;
@@ -50,19 +59,44 @@ public class ArchiveTab extends Fragment {
         super.onActivityCreated(savedInstanceState);
         editTextLinkUploadArchive = (EditText)getActivity().findViewById(R.id.edit_UploadArchive_ID);
         btn_downloadArchive = (Button) getActivity().findViewById(R.id.btn_UploadArchive_ID);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION);
+                return;
+            }
+        }
+        buttonWork();
+    }
+
+    public void buttonWork(){
         btn_downloadArchive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                File dir = new File(Environment.DIRECTORY_DOWNLOADS);
+                File dir = new File(Environment.getExternalStorageDirectory()+ "/Download/");
                 try {
                     dir.mkdir();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(getActivity(), "Cannot create folder!", Toast.LENGTH_SHORT).show();
                 }
-                    new DownloadFileAsync().execute(editTextLinkUploadArchive.getText().toString());
+                //new DownloadFileAsync().execute(editTextLinkUploadArchive.getText().toString());
+                new DownloadFileAsync().execute(PATH_TO_DOWNLOAD);
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case MY_PERMISSION:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
+                    buttonWork();
+                }
+                else {
+                    Toast.makeText(getActivity(), "Permission not granted!", Toast.LENGTH_SHORT).show();
+                }
+        }
     }
 
     @Override
@@ -100,7 +134,7 @@ public class ArchiveTab extends Fragment {
                     file_size = fileLenght;
 
                     inputStream = connection.getInputStream();
-                    outputStream = new FileOutputStream((Environment.DIRECTORY_DOWNLOADS + file_name));
+                    outputStream = new FileOutputStream((Environment.getExternalStorageDirectory()+ "/Download/" + file_name));
 
                     byte data[] = new byte[4096];
                     long total = 0;
@@ -155,8 +189,7 @@ public class ArchiveTab extends Fragment {
                 @Override
                 public void onCancel(DialogInterface dialog) {
                     Toast.makeText(getActivity(), "Download canceled", Toast.LENGTH_SHORT).show();
-
-                    File dir = new File ((Environment.DIRECTORY_DOWNLOADS + file_name));
+                    File dir = new File ((Environment.getExternalStorageDirectory()+ "/Download/" + file_name));
                     try {
                         dir.delete();
                     }catch (Exception e){

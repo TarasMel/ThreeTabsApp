@@ -29,8 +29,8 @@
             android:id="@+id/btn_UploadImage_ID"/>
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageView_ImageTab_ID"
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/photoView_ImageTab_ID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
