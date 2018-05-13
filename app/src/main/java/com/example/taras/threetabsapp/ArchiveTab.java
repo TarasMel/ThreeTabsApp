@@ -1,6 +1,5 @@
 package com.example.taras.threetabsapp;
 
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -22,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,16 +29,20 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
-
-
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 
 public class ArchiveTab extends Fragment {
 
     private static final int MY_PERMISSION = 1;
-    private static final String PATH_TO_DOWNLOAD = "http://storage.rulsmart.com/1c46/getfiles/kartinki/1254497292_tachki.zip";
+    //private static final String PATH_TO_DOWNLOAD = "http://storage.rulsmart.com/1c46/getfiles/kartinki/1254497292_tachki.zip";
+    //private static final String FILE_NAME = "1254497292_tachki.zip";
+    
+    String fileNameUnZip;
     private ProgressDialog progressDialog;
     private Button btn_downloadArchive;
+    private Button btn_unzipArchive;
     private EditText editTextLinkUploadArchive;
     private OnFragmentInteractionListener mListener;
 
@@ -59,6 +63,7 @@ public class ArchiveTab extends Fragment {
         super.onActivityCreated(savedInstanceState);
         editTextLinkUploadArchive = (EditText)getActivity().findViewById(R.id.edit_UploadArchive_ID);
         btn_downloadArchive = (Button) getActivity().findViewById(R.id.btn_UploadArchive_ID);
+        btn_unzipArchive = (Button) getActivity().findViewById(R.id.btn_unzipArchive_ID);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION);
@@ -66,23 +71,6 @@ public class ArchiveTab extends Fragment {
             }
         }
         buttonWork();
-    }
-
-    public void buttonWork(){
-        btn_downloadArchive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                File dir = new File(Environment.getExternalStorageDirectory()+ "/Download/");
-                try {
-                    dir.mkdir();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), "Cannot create folder!", Toast.LENGTH_SHORT).show();
-                }
-                //new DownloadFileAsync().execute(editTextLinkUploadArchive.getText().toString());
-                new DownloadFileAsync().execute(PATH_TO_DOWNLOAD);
-            }
-        });
     }
 
     @Override
@@ -98,6 +86,67 @@ public class ArchiveTab extends Fragment {
                 }
         }
     }
+
+    public void buttonWork(){
+        btn_downloadArchive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                File dir = new File(Environment.getExternalStorageDirectory() + "/Download/");
+                try {
+                    dir.mkdir();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "Cannot create folder for download!", Toast.LENGTH_SHORT).show();
+                }
+                new DownloadFileAsync().execute(editTextLinkUploadArchive.getText().toString());
+            }
+        });
+        btn_unzipArchive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                File folder = new File(Environment.getExternalStorageDirectory() + "/Download/" + "unzip" +fileNameUnZip);
+                try {
+                    folder.mkdir();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "Cannot create folder for unzip!", Toast.LENGTH_SHORT).show();
+                }
+                if(unzip(Environment.getExternalStorageDirectory() + "/Download/" + fileNameUnZip, Environment.getExternalStorageDirectory() + "/Download/" + "unzip" +fileNameUnZip)){
+                    Toast.makeText(getActivity(), "Unzip success", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(getActivity(), "Unzip failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    public static Boolean unzip(String sourceFile, String destinationFolder) {
+        byte[] buffer = new byte[8192];
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(sourceFile));
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                String fileName = ze.getName();
+                File newFile = new File(destinationFolder + File.separator + fileName);
+                new File(newFile.getParent()).mkdirs();
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+                ze = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+        }
+        catch(IOException ex){
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public void onDetach() {
@@ -115,7 +164,7 @@ public class ArchiveTab extends Fragment {
         @Override
         protected String doInBackground(String... params) {
             file_name = params[0].substring(params[0].lastIndexOf("/")+1);
-
+            fileNameUnZip = file_name;
             try{
                 InputStream inputStream = null;
                 OutputStream outputStream = null;
@@ -129,14 +178,11 @@ public class ArchiveTab extends Fragment {
                         return "Server returned HTTP" + connection.getResponseCode() + " " +
                                 connection.getResponseMessage();
                     }
-
-                    int fileLenght = connection.getContentLength();
-                    file_size = fileLenght;
-
+                    int fileLength = connection.getContentLength();
+                    file_size = fileLength;
                     inputStream = connection.getInputStream();
                     outputStream = new FileOutputStream((Environment.getExternalStorageDirectory()+ "/Download/" + file_name));
-
-                    byte data[] = new byte[4096];
+                    byte data[] = new byte[8196];
                     long total = 0;
                     int count;
                     while((count = inputStream.read(data)) != -1){
@@ -144,13 +190,11 @@ public class ArchiveTab extends Fragment {
                             return null;
                         }
                         total += count;
-                        if (fileLenght > 0){
-                            publishProgress((int) (total *  100/fileLenght));
+                        if (fileLength > 0){
+                            publishProgress((int) (total *  100/fileLength));
                         }
-
                         outputStream.write(data, 0, count);
                     }
-
                 }catch (Exception e){
                     return e.toString();
                 }finally {
@@ -169,9 +213,7 @@ public class ArchiveTab extends Fragment {
                     }
                 }
             } finally {
-
             }
-
             return null;
         }
 
@@ -184,7 +226,6 @@ public class ArchiveTab extends Fragment {
             progressDialog.setIndeterminate(true);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setCancelable(true);
-
             progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
@@ -197,7 +238,6 @@ public class ArchiveTab extends Fragment {
                     }
                 }
             });
-
             progressDialog.show();
         }
 

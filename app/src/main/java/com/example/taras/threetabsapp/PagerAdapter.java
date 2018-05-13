@@ -19,8 +19,8 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                SQLTabList geograficTab  = new SQLTabList();
-                return geograficTab;
+                SQLTabList sqlTabList  = new SQLTabList();
+                return sqlTabList;
             case 1:
                 ImageTab imageTab = new ImageTab();
                 return imageTab;

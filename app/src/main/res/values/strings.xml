@@ -17,6 +17,7 @@
     <string name="btn_add_to_list">Add</string>
     <string name="btn_find_in_list">Find</string>
     <string name="btn_upload">Upload</string>
+    <string name="btn_unZipArchive">unzip</string>
 
 
 </resources>

@@ -77,6 +77,4 @@ public class ImageTab extends Fragment {
     }
 
     interface OnFragmentInteractionListener {}
-
 }
-
